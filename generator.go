@@ -46,6 +46,7 @@ func (ge *Generator)GetState(pn string)*State  {
 
 type State struct {
 	Pid []byte 					`json:"pid"`
+	K 	int 					`json:"k"`
 	BlockNumber *big.Int 		`json:"block_number"`
 	Challenge	[]byte 			`json:"challenge"`
 	Deadline	*big.Int 		`json:"deadline"`
@@ -53,9 +54,10 @@ type State struct {
 	Reward 		string  `json:"reward"`
 }
 
-func NewState(pid []byte,number *big.Int,challenge []byte,difficulty *big.Int,proof []byte,reward string)*State  {
+func NewState(pid []byte,k int,number *big.Int,challenge []byte,difficulty *big.Int,proof []byte,reward string)*State  {
 	st := &State{
 		Pid: pid,
+		K: k,
 		BlockNumber: number,
 		Challenge: challenge,
 		Proof: proof,
