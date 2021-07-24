@@ -2,6 +2,7 @@ package poc
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gnc-project/poc/chiapos"
 )
 
@@ -28,5 +29,16 @@ func ValidateProof(pid []byte,proof []byte,challenge []byte,k int) ([]byte, erro
 	copy(ch[:],challenge[:32])
 	pv := getProofVerifier()
 
-	return pv.GetVerifiedQuality(pid,proof,ch,k)
+	q,err := pv.GetVerifiedQuality(pid,proof,ch,k)
+	if err != nil {
+		return nil, err
+	}
+	if q == nil {
+		return nil, fmt.Errorf("q is nil")
+	}
+	if len(q) == 0 {
+		return nil, fmt.Errorf("q is zero")
+	}
+
+	return q ,nil
 }

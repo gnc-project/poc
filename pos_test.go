@@ -30,13 +30,5 @@ func cal()  {
 		panic(err)
 	}
 
-	if q == nil {
-		panic("aaaaaaaaaaaaaa")
-	}
-
-	if len(q) == 0 {
-		panic("bbbbbbbbbbbbbbb")
-	}
-
 	fmt.Println(hex.EncodeToString(q))
 }
