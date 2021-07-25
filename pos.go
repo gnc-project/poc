@@ -17,14 +17,18 @@ func getProofVerifier() *chiapos.ProofVerifier {
 	return proofVerifier
 }
 
-func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge [32]byte,difficulty,elapsedTime *big.Int) (bool, error) {
+func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge,parentCh [32]byte,difficulty,elapsedTime *big.Int) (bool, error) {
 
-	quality,err := GetVerifiedQuality(pid,k,proof,challenge)
+	quality,err := GetVerifiedQuality(pid,k,proof,parentCh)
 	if err != nil {
 		return false,err
 	}
 
-	deadline := CalculateDeadline(challenge,quality,difficulty)
+	if challenge != NextChallenge(parentCh,quality) {
+		return false,fmt.Errorf("invalid challenge")
+	}
+
+	deadline := CalculateDeadline(parentCh,quality,difficulty)
 	if elapsedTime.Cmp(deadline) < 0{
 		return false,fmt.Errorf("invalid deadline (elapsedTime: %v,deadline: %v)", elapsedTime, deadline)
 	}
@@ -56,6 +60,10 @@ func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]b
 }
 
 func GetQuality(prover *chiapos.DiskProver,challenge [32]byte)([][]byte, error) {
+
+	if prover.Size() < chiapos.MinPlotSize || prover.Size() > chiapos.MaxPlotSize {
+		return nil, errors.New("invalid plot k size")
+	}
 
 	if !chiapos.PassPlotFilter(prover.ID(),challenge){
 		return nil,errors.New("not passing plot filter")
