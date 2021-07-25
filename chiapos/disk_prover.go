@@ -53,7 +53,7 @@ func NewDiskProver(filename string, loadPlotInfo bool) (*DiskProver, error) {
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
-	log.Println("disk prover open", "filename", filename)
+	//log.Println("disk prover open", "filename", filename)
 
 	dp := &DiskProver{
 		ptr:      cdp,
