@@ -54,3 +54,12 @@ func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]b
 
 	return quality, nil
 }
+
+func GetQuality(prover *chiapos.DiskProver,challenge [32]byte)([][]byte, error) {
+
+	if !chiapos.PassPlotFilter(prover.ID(),challenge){
+		return nil,errors.New("not passing plot filter")
+	}
+
+	return prover.GetQualitiesForChallenge(challenge)
+}

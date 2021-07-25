@@ -49,6 +49,7 @@ type State struct {
 	K 	int 					`json:"k"`
 	BlockNumber *big.Int 		`json:"block_number"`
 	Challenge	[32]byte 			`json:"challenge"`
+	quality     []byte				`json:"quality"`
 	Deadline	*big.Int 		`json:"deadline"`
 	Proof  		[]byte	  		`json:"proof"`
 	Reward 		string  `json:"reward"`
@@ -72,8 +73,8 @@ func (s *State)GeyKey() string {
 	return hex.EncodeToString(key[:])
 }
 
-func (s *State)NextChallenge() []byte {
-	challenge := sha256.Sum256(append(s.Challenge[:],s.Pid[:]...))
-	return challenge[:]
+func (s *State)NextChallenge() [32]byte {
+	challenge := sha256.Sum256(append(s.Challenge[:],s.quality...))
+	return challenge
 }
 
