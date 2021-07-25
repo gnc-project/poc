@@ -4,10 +4,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gnc-project/poc/chiapos"
-	"github.com/stretchr/testify/require"
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type Scheme interface {

@@ -14,8 +14,8 @@ package chiapos
 import "C"
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"unsafe"
 )
 
@@ -46,14 +46,14 @@ func NewDiskProver(filename string, loadPlotInfo bool) (*DiskProver, error) {
 	var cerr *C.char
 	cdp := C.NewDiskProver(cstr, &cerr)
 	if cerr != nil {
-		defer C.free(unsafe.Pointer(cerr))
+		defer localCFree(unsafe.Pointer(cerr))
 
-		log.Println( "open disk prover failed", "err",C.GoString(cerr))
+		//logging.CPrint(logging.DEBUG, "open disk prover failed", logging.LogFormat{"err": C.GoString(cerr)})
 
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
-	//log.Println("disk prover open", "filename", filename)
+	//logging.CPrint(logging.DEBUG, "disk prover open", logging.LogFormat{"filename": filename})
 
 	dp := &DiskProver{
 		ptr:      cdp,
@@ -97,7 +97,7 @@ func (dp *DiskProver) getMemo() ([]byte, error) {
 
 		C.GetMemo(dp.ptr, &out, &length)
 		if out != nil {
-			defer C.free(unsafe.Pointer(out))
+			defer localCFree(unsafe.Pointer(out))
 			dp.memo = C.GoBytes(unsafe.Pointer(out), length)
 		}
 	}
@@ -153,6 +153,9 @@ func (dp *DiskProver) getPlotInfo() (*PlotInfo, error) {
 	default:
 		return nil, fmt.Errorf("memo has invalid number of bytes %d", len(memo))
 	}
+	if info.PoolPublicKey == nil {
+		return nil, errors.New("pool_public_key must be valid")
+	}
 	info.LocalSk, err = MasterSkToLocalSk(info.MasterSk)
 	if err != nil {
 		return nil, err
@@ -184,7 +187,7 @@ func (dp *DiskProver) getID() ([32]byte, error) {
 
 		C.GetID(dp.ptr, &out, &length)
 		if out != nil {
-			defer C.free(unsafe.Pointer(out))
+			defer localCFree(unsafe.Pointer(out))
 
 			buf := C.GoBytes(unsafe.Pointer(out), length)
 			copy(dp.id[:], buf)
@@ -230,11 +233,11 @@ func (dp *DiskProver) GetQualitiesForChallenge(challenge [32]byte) ([][]byte, er
 
 	cerr := C.GetQualitiesForChallenge(dp.ptr, (*C.uchar)(cPtr), &out, &catLen, &num)
 	if cerr != nil {
-		defer C.free(unsafe.Pointer(cerr))
+		defer localCFree(unsafe.Pointer(cerr))
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
-	defer C.free(unsafe.Pointer(out))
+	defer localCFree(unsafe.Pointer(out))
 
 	ret := make([][]byte, 0, int(num))
 	cat := C.GoBytes(unsafe.Pointer(out), catLen)
@@ -261,12 +264,12 @@ func (dp *DiskProver) GetFullProof(challenge [32]byte, index uint32) ([]byte, er
 
 	C.GetFullProof(dp.ptr, (*C.uchar)(cPtr), C.uint(index), &out, &length, &cerr)
 	if cerr != nil {
-		defer C.free(unsafe.Pointer(cerr))
-		log.Println("get full proof failed", "err",C.GoString(cerr))
+		defer localCFree(unsafe.Pointer(cerr))
+		//logging.CPrint(logging.DEBUG, "get full proof failed", logging.LogFormat{"err": C.GoString(cerr)})
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
-	defer C.free(unsafe.Pointer(out))
+	defer localCFree(unsafe.Pointer(out))
 
 	return C.GoBytes(unsafe.Pointer(out), length), nil
 }
@@ -274,7 +277,7 @@ func (dp *DiskProver) GetFullProof(challenge [32]byte, index uint32) ([]byte, er
 func (dp *DiskProver) Close() error {
 	if dp.ptr != nil {
 		C.DeleteDiskProver(dp.ptr)
-		//log.Println( "disk prover closed", "filename",dp.filename)
+		//logging.CPrint(logging.DEBUG, "disk prover closed", logging.LogFormat{"filename": dp.filename})
 		dp.ptr = nil
 	}
 	return nil

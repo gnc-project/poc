@@ -26,7 +26,10 @@ func NewDiskPlotter() (*DiskPlotter, error) {
 	var cerr *C.char
 	cptr := C.NewDiskPlotter(&cerr)
 	if cerr != nil {
-		defer C.free(unsafe.Pointer(cerr))
+		defer localCFree(unsafe.Pointer(cerr))
+
+		//logging.CPrint(logging.INFO, "failed to new plotter", logging.LogFormat{"err": C.GoString(cerr)})
+
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 	return &DiskPlotter{
@@ -81,7 +84,7 @@ func (p *DiskPlotter) CreatePlotDisk(
 		C.uint8_t(nobitfield),
 	)
 	if cerr != nil {
-		defer C.free(unsafe.Pointer(cerr))
+		defer localCFree(unsafe.Pointer(cerr))
 		return fmt.Errorf(C.GoString(cerr))
 	}
 	return nil
@@ -90,6 +93,7 @@ func (p *DiskPlotter) CreatePlotDisk(
 func (p *DiskPlotter) Close() error {
 	if p.ptr != nil {
 		C.DeleteDiskPlotter(p.ptr)
+		//logging.CPrint(logging.INFO, "disk plotter closed")
 		p.ptr = nil
 	}
 	return nil
