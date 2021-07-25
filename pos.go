@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gnc-project/poc/chiapos"
+	"math/big"
 )
 
 var proofVerifier *chiapos.ProofVerifier
@@ -16,29 +17,40 @@ func getProofVerifier() *chiapos.ProofVerifier {
 	return proofVerifier
 }
 
-func ValidateProof(pid []byte,proof []byte,challenge []byte,k int) ([]byte, error) {
-	if len(challenge) != 32 {
-		return nil,errors.New("invalid challenge")
+func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge [32]byte,difficulty,elapsedTime *big.Int) (bool, error) {
+
+	quality,err := GetVerifiedQuality(pid,k,proof,challenge)
+	if err != nil {
+		return false,err
 	}
+
+	deadline := CalculateDeadline(challenge,quality,difficulty)
+	if elapsedTime.Cmp(deadline) < 0{
+		return false,fmt.Errorf("invalid deadline (elapsedTime: %v,deadline: %v)", elapsedTime, deadline)
+	}
+
+	return true, nil
+}
+
+func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]byte, error)  {
 
 	if k < chiapos.MinPlotSize || k > chiapos.MaxPlotSize {
 		return nil, errors.New("invalid plot k size")
 	}
 
-	var ch [32]byte
-	copy(ch[:],challenge[:32])
-	pv := getProofVerifier()
+	if pass := chiapos.PassPlotFilter(pid,challenge); !pass {
+		return nil, errors.New("not passing plot filter")
+	}
 
-	q,err := pv.GetVerifiedQuality(pid,proof,ch,k)
+	pv := getProofVerifier()
+	quality,err := pv.GetVerifiedQuality(pid[:],proof,challenge,k)
 	if err != nil {
 		return nil, err
 	}
-	if q == nil {
-		return nil, fmt.Errorf("q is nil")
-	}
-	if len(q) == 0 {
-		return nil, fmt.Errorf("q is zero")
+
+	if len(quality) == 0 {
+		return nil, errors.New("empty chia pos quality")
 	}
 
-	return q ,nil
+	return quality, nil
 }

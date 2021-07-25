@@ -45,16 +45,16 @@ func (ge *Generator)GetState(pn string)*State  {
 }
 
 type State struct {
-	Pid []byte 					`json:"pid"`
+	Pid [32]byte 					`json:"pid"`
 	K 	int 					`json:"k"`
 	BlockNumber *big.Int 		`json:"block_number"`
-	Challenge	[]byte 			`json:"challenge"`
+	Challenge	[32]byte 			`json:"challenge"`
 	Deadline	*big.Int 		`json:"deadline"`
 	Proof  		[]byte	  		`json:"proof"`
 	Reward 		string  `json:"reward"`
 }
 
-func NewState(pid []byte,k int,number *big.Int,challenge []byte,difficulty *big.Int,proof []byte,reward string)*State  {
+func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,difficulty *big.Int,proof []byte,quality []byte,reward string)*State  {
 	st := &State{
 		Pid: pid,
 		K: k,
@@ -63,17 +63,17 @@ func NewState(pid []byte,k int,number *big.Int,challenge []byte,difficulty *big.
 		Proof: proof,
 		Reward: reward,
 	}
-	st.Deadline = CalcuteDeadline(pid,challenge,difficulty)
+	st.Deadline = CalculateDeadline(challenge,quality,difficulty)
 	return st
 }
 
 func (s *State)GeyKey() string {
-	key := sha256.Sum256(append(s.Pid,s.BlockNumber.Bytes()...))
+	key := sha256.Sum256(append(s.Pid[:],s.BlockNumber.Bytes()...))
 	return hex.EncodeToString(key[:])
 }
 
 func (s *State)NextChallenge() []byte {
-	challenge := sha256.Sum256(append(s.Challenge,s.Pid...))
+	challenge := sha256.Sum256(append(s.Challenge[:],s.Pid[:]...))
 	return challenge[:]
 }
 

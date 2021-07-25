@@ -10,7 +10,7 @@ import (
 
 func TestDiskProver_Close(t *testing.T) {
 
-	prover,err := chiapos.NewDiskProver("/nvme/plots/plot-k32-2021-07-12-14-52-fa216e51dafd2a1bb964bd4184a4168ced78b0ac51de2eec114890807b8df5ce.plot",true)
+	 prover,err := chiapos.NewDiskProver("/nvme/plots/plot-k32-2021-07-12-14-52-fa216e51dafd2a1bb964bd4184a4168ced78b0ac51de2eec114890807b8df5ce.plot",true)
 	 if err != nil {
 	 	panic(err)
 	 }
