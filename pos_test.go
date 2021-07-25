@@ -1,14 +1,22 @@
 package poc
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/gnc-project/poc/chiapos"
 	"math/big"
+	"math/rand"
 	"testing"
 )
 
 func TestValidateProof(t *testing.T) {
+	for i := 0; i<10; i++ {
+		hash := sha256.Sum256([]byte(fmt.Sprintf("%d",rand.Intn(100000000))))
+		he := hex.EncodeToString(hash[:])
+		fmt.Println(he)
+	}
+
 }
 
 func cal()  {
@@ -32,7 +40,7 @@ func cal()  {
 		if err != nil {
 			panic(err)
 		}
-		b,err := ValidateDeadline(prover.ID(),32,proof,challenge,big.NewInt(17179869184),big.NewInt(20))
+		b,err := ValidateDeadline(prover.ID(),32,proof,challenge,challenge,big.NewInt(17179869184),big.NewInt(20))
 		if err != nil {
 			panic(err)
 		}

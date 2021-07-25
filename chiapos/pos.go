@@ -238,7 +238,7 @@ func CalculatePosChallenge(plotID, challenge [32]byte) [32]byte {
 
 func PassPlotFilter(plotID, challenge [32]byte) bool {
 	input := CalculatePlotFilterInput(plotID, challenge)
-	return input[0] < 2
+	return input[0] < 26
 }
 
 func localCFree(p unsafe.Pointer) {
