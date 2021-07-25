@@ -65,7 +65,7 @@ func GetQuality(prover *chiapos.DiskProver,challenge [32]byte)([][]byte, error) 
 		return nil, errors.New("invalid plot k size")
 	}
 
-	if !chiapos.PassPlotFilter(prover.ID(),challenge){
+	if pass := chiapos.PassPlotFilter(prover.ID(),challenge); !pass{
 		return nil,errors.New("not passing plot filter")
 	}
 

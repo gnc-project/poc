@@ -274,7 +274,7 @@ func (dp *DiskProver) GetFullProof(challenge [32]byte, index uint32) ([]byte, er
 func (dp *DiskProver) Close() error {
 	if dp.ptr != nil {
 		C.DeleteDiskProver(dp.ptr)
-		log.Println( "disk prover closed", "filename",dp.filename)
+		//log.Println( "disk prover closed", "filename",dp.filename)
 		dp.ptr = nil
 	}
 	return nil
