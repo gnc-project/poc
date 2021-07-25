@@ -15,6 +15,7 @@ import "C"
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -237,7 +238,9 @@ func CalculatePosChallenge(plotID, challenge [32]byte) [32]byte {
 }
 
 func PassPlotFilter(plotID, challenge [32]byte) bool {
-	input := CalculatePlotFilterInput(plotID, challenge)
+	//input := CalculatePlotFilterInput(plotID, challenge)
+	//return input[0] == 0
+	input := sha256.Sum256(append(plotID[:],challenge[:]...))
 	return input[0] == 0
 }
 
