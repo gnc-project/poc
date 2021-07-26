@@ -77,7 +77,3 @@ func (s *State)GeyKey() string {
 func (s *State)NextChallenge() [32]byte {
 	return NextChallenge(s.Challenge,s.Quality)
 }
-
-func NextChallenge(challenge [32]byte,quality []byte) [32]byte {
-	return sha256.Sum256(append(challenge[:],quality...))
-}
