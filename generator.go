@@ -46,23 +46,21 @@ func (ge *Generator)GetState(pn string)*State  {
 
 type State struct {
 	Pid [32]byte 					`json:"pid"`
-	K 	int 					`json:"k"`
-	BlockNumber *big.Int 		`json:"block_number"`
+	K 	int 						`json:"k"`
+	BlockNumber *big.Int 			`json:"block_number"`
 	Challenge	[32]byte 			`json:"challenge"`
 	Quality     []byte				`json:"quality"`
-	Deadline	*big.Int 		`json:"deadline"`
-	Proof  		[]byte	  		`json:"proof"`
-	Reward 		string  `json:"reward"`
+	Deadline	*big.Int 			`json:"deadline"`
+	Proof  		[]byte	  			`json:"proof"`
 }
 
-func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,difficulty *big.Int,proof []byte,quality []byte,reward string)*State  {
+func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,difficulty *big.Int,proof []byte,quality []byte)*State  {
 	st := &State{
 		Pid: pid,
 		K: k,
 		BlockNumber: number,
 		Challenge: challenge,
 		Proof: proof,
-		Reward: reward,
 		Quality: quality,
 	}
 	st.Deadline = CalculateDeadline(challenge,quality,difficulty)
