@@ -54,7 +54,7 @@ type State struct {
 	Proof  		[]byte	  			`json:"proof"`
 }
 
-func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,difficulty *big.Int,proof []byte,quality []byte)*State  {
+func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,baseTarget *big.Int,proof []byte,quality []byte)*State  {
 	st := &State{
 		Pid: pid,
 		K: k,
@@ -63,7 +63,7 @@ func NewState(pid [32]byte,k int,number *big.Int,challenge [32]byte,difficulty *
 		Proof: proof,
 		Quality: quality,
 	}
-	st.Deadline = CalculateDeadline(challenge,quality,difficulty)
+	st.Deadline = CalculateDeadline(challenge,quality,baseTarget)
 	return st
 }
 
