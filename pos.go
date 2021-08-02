@@ -23,7 +23,7 @@ func NextChallenge(challenge [32]byte,quality []byte) [32]byte {
 	return sha256.Sum256(append(challenge[:],quality...))
 }
 
-func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge,parentCh [32]byte,difficulty,elapsedTime *big.Int) (bool, error) {
+func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge,parentCh [32]byte,baseTarget,elapsedTime *big.Int) (bool, error) {
 
 	quality,err := GetVerifiedQuality(pid,k,proof,parentCh)
 	if err != nil {
@@ -34,7 +34,7 @@ func ValidateDeadline(pid [32]byte,k int,proof []byte,challenge,parentCh [32]byt
 		return false,fmt.Errorf("invalid challenge")
 	}
 
-	deadline := CalculateDeadline(pid,parentCh[:],difficulty)
+	deadline := CalculateDeadline(pid,parentCh[:],baseTarget)
 	if elapsedTime.Cmp(deadline) < 0{
 		return false,fmt.Errorf("invalid deadline (elapsedTime: %v,deadline: %v)", elapsedTime, deadline)
 	}
