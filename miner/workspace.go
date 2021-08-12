@@ -16,9 +16,15 @@ type WorkSpaceQuality struct {
 func GetChiaQualities(plots []*chiapos.DiskProver,challenge [32]byte) []*WorkSpaceQuality {
 	var ws []*WorkSpaceQuality
 	for _,p := range plots {
+
+		if p.Size() < chiapos.MinPlotSize || p.Size() > chiapos.MaxPlotSize {
+			continue
+		}
+
 		if pass := chiapos.PassPlotFilter(p.ID(), challenge); !pass {
 			continue
 		}
+
 		posChallenge := chiapos.CalculatePosChallenge(p.ID(), challenge)
 		q,e := p.GetQualitiesForChallenge(posChallenge)
 		if e != nil {

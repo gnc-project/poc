@@ -33,7 +33,9 @@ func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]b
 	verifier := chiapos.NewProofVerifier()
 	defer verifier.Free()
 
-	quality,err := verifier.GetVerifiedQuality(pid[:],proof,challenge,k)
+	posChallenge := chiapos.CalculatePosChallenge(pid, challenge)
+
+	quality,err := verifier.GetVerifiedQuality(pid[:],proof,posChallenge,k)
 	if err != nil {
 		return nil, err
 	}

@@ -68,8 +68,8 @@ func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,chal
 							bestChiaQualityIndex = i
 						}
 					}
-
-					if bestQuality.Cmp(difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)) > 0 {
+					nextDiff := difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)
+					if bestQuality.Cmp(nextDiff) > 0 {
 						bestChiaQuality := chiaQualities[bestChiaQualityIndex]
 						proof, err := bestChiaQuality.Plot.GetFullProof(challenge,bestChiaQuality.Index)
 						if err != nil {
@@ -78,7 +78,7 @@ func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,chal
 						id := bestChiaQuality.Plot.ID()
 						pid := hex.EncodeToString(id[:])
 
-						return addPlot(client,pid,hex.EncodeToString(proof),bestChiaQuality.Plot.Size(),bestQuality,number,blockTime.Unix())
+						return addPlot(client,pid,hex.EncodeToString(proof),bestChiaQuality.Plot.Size(),nextDiff,number,blockTime.Unix())
 					}
 
 					// increase slot and header Timestamp
@@ -90,9 +90,9 @@ func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,chal
 }
 
 //mining
-func addPlot(client *rpc.Client,pid,proof string,k uint8,quality *big.Int,number uint64,timestamp int64) error {
+func addPlot(client *rpc.Client,pid,proof string,k uint8,difficulty *big.Int,number uint64,timestamp int64) error {
 	result := make(map[string]interface{})
-	err := client.Call(&result,"eth_addPlot",pid,proof,k,quality,number,timestamp)
+	err := client.Call(&result,"eth_addPlot",pid,proof,k,difficulty,number,timestamp)
 	if err != nil {
 		return err
 	}
