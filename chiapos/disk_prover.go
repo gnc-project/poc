@@ -47,13 +47,8 @@ func NewDiskProver(filename string, loadPlotInfo bool) (*DiskProver, error) {
 	cdp := C.NewDiskProver(cstr, &cerr)
 	if cerr != nil {
 		defer localCFree(unsafe.Pointer(cerr))
-
-		//logging.CPrint(logging.DEBUG, "open disk prover failed", logging.LogFormat{"err": C.GoString(cerr)})
-
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
-
-	//logging.CPrint(logging.DEBUG, "disk prover open", logging.LogFormat{"filename": filename})
 
 	dp := &DiskProver{
 		ptr:      cdp,
@@ -265,7 +260,6 @@ func (dp *DiskProver) GetFullProof(challenge [32]byte, index uint32) ([]byte, er
 	C.GetFullProof(dp.ptr, (*C.uchar)(cPtr), C.uint(index), &out, &length, &cerr)
 	if cerr != nil {
 		defer localCFree(unsafe.Pointer(cerr))
-		//logging.CPrint(logging.DEBUG, "get full proof failed", logging.LogFormat{"err": C.GoString(cerr)})
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
@@ -277,7 +271,6 @@ func (dp *DiskProver) GetFullProof(challenge [32]byte, index uint32) ([]byte, er
 func (dp *DiskProver) Close() error {
 	if dp.ptr != nil {
 		C.DeleteDiskProver(dp.ptr)
-		//logging.CPrint(logging.DEBUG, "disk prover closed", logging.LogFormat{"filename": dp.filename})
 		dp.ptr = nil
 	}
 	return nil

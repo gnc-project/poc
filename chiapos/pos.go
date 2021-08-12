@@ -209,7 +209,6 @@ func (pv *ProofVerifier) GetVerifiedQuality(plotSeed, proof []byte, challenge [3
 		&out, &outLen, &cerr)
 	if cerr != nil {
 		defer localCFree(unsafe.Pointer(cerr))
-		//logging.CPrint(logging.WARN, "get verified quality failed", logging.LogFormat{"err": C.GoString(cerr)})
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
 
@@ -238,7 +237,7 @@ func CalculatePosChallenge(plotID, challenge [32]byte) [32]byte {
 
 func PassPlotFilter(plotID, challenge [32]byte) bool {
 	input := CalculatePlotFilterInput(plotID, challenge)
-	return input[0] < 26
+	return (input[0] == 0) && (input[1]&0b10000000 == 0)
 }
 
 func localCFree(p unsafe.Pointer) {
@@ -248,3 +247,4 @@ func localCFree(p unsafe.Pointer) {
 		C.FreeForWin(p)
 	}
 }
+

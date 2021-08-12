@@ -16,6 +16,7 @@ import "C"
 import (
 	"fmt"
 	"unsafe"
+
 )
 
 type DiskPlotter struct {
@@ -27,8 +28,6 @@ func NewDiskPlotter() (*DiskPlotter, error) {
 	cptr := C.NewDiskPlotter(&cerr)
 	if cerr != nil {
 		defer localCFree(unsafe.Pointer(cerr))
-
-		//logging.CPrint(logging.INFO, "failed to new plotter", logging.LogFormat{"err": C.GoString(cerr)})
 
 		return nil, fmt.Errorf(C.GoString(cerr))
 	}
@@ -93,7 +92,6 @@ func (p *DiskPlotter) CreatePlotDisk(
 func (p *DiskPlotter) Close() error {
 	if p.ptr != nil {
 		C.DeleteDiskPlotter(p.ptr)
-		//logging.CPrint(logging.INFO, "disk plotter closed")
 		p.ptr = nil
 	}
 	return nil
