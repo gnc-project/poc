@@ -2,7 +2,6 @@ package miner
 
 import (
 	"encoding/hex"
-	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/gnc-project/poc"
 	"github.com/gnc-project/poc/chiapos"
 	"github.com/gnc-project/poc/difficulty"
@@ -12,7 +11,16 @@ import (
 	"time"
 )
 
-func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,challenge [32]byte,
+type Commit struct {
+	Pid 	string	`json:"pid"`
+	Proof   string	`json:"proof"`
+	K 		uint8	`json:"k"`
+	Difficulty 	*big.Int	`json:"difficulty"`
+	Number 		uint64		`json:"number"`
+	Timestamp 	int64		`json:"timestamp"`
+}
+
+func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver,challenge [32]byte,
 		number uint64,lastBlockTime time.Time,diff *big.Int) error {
 
 	blockTime := lastBlockTime.Add(1 * poc.PoCSlot * time.Second)
@@ -78,7 +86,15 @@ func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,chal
 						id := bestChiaQuality.Plot.ID()
 						pid := hex.EncodeToString(id[:])
 
-						return addPlot(client,pid,hex.EncodeToString(proof),bestChiaQuality.Plot.Size(),nextDiff,number,blockTime.Unix())
+						commit <- &Commit{
+							pid,
+							hex.EncodeToString(proof),
+							bestChiaQuality.Plot.Size(),
+							nextDiff,
+							number,
+							blockTime.Unix(),
+						}
+						return nil
 					}
 
 					// increase slot and header Timestamp
@@ -87,15 +103,4 @@ func Mine(quit chan struct{},client *rpc.Client,plots []*chiapos.DiskProver,chal
 				}
 			}
 		}
-}
-
-//mining
-func addPlot(client *rpc.Client,pid,proof string,k uint8,difficulty *big.Int,number uint64,timestamp int64) error {
-	result := make(map[string]interface{})
-	err := client.Call(&result,"eth_addPlot",pid,proof,k,difficulty,number,timestamp)
-	if err != nil {
-		return err
-	}
-	log.Printf("blockNumber=%v,deadline=%.2f",result["blockNumber"],result["deadline"].(float64))
-	return nil
 }
