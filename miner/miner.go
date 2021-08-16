@@ -11,14 +11,6 @@ import (
 	"time"
 )
 
-type Commit struct {
-	Pid 	string	`json:"pid"`
-	Proof   string	`json:"proof"`
-	K 		uint8	`json:"k"`
-	Difficulty 	*big.Int	`json:"difficulty"`
-	Number 		uint64		`json:"number"`
-	Timestamp 	int64		`json:"timestamp"`
-}
 
 func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver,challenge [32]byte,
 		number uint64,lastBlockTime time.Time,diff *big.Int) error {
