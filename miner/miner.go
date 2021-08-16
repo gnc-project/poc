@@ -78,7 +78,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 						id := bestChiaQuality.Plot.ID()
 						pid := hex.EncodeToString(id[:])
 
-						commit <- &Commit{
+						commit <- &poc.Commit{
 							pid,
 							hex.EncodeToString(proof),
 							bestChiaQuality.Plot.Size(),

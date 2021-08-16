@@ -1,4 +1,4 @@
-package miner
+package poc
 
 import "math/big"
 
