@@ -46,3 +46,21 @@ func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]b
 
 	return quality, nil
 }
+
+func GetGNCProof(challenge [32]byte, index uint32,plot *chiapos.DiskProver) ([]byte, error)  {
+
+	if plot.Size() < chiapos.MinPlotSize || plot.Size() > chiapos.MaxPlotSize {
+		return nil, errors.New("invalid plot k size")
+	}
+
+	if pass := chiapos.PassPlotFilter(plot.ID(), challenge); !pass {
+		return nil, errors.New("not passing plot filter")
+	}
+
+	posChallenge := chiapos.CalculatePosChallenge(plot.ID(), challenge)
+	proof, err := plot.GetFullProof(posChallenge, index)
+	if err != nil {
+		return nil, err
+	}
+	return proof,nil
+}
