@@ -62,18 +62,19 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 
 					// find best quality
 					bestQuality.SetUint64(0)
-					for i, quality := range qualities {
+					for iq, quality := range qualities {
 						if quality.Cmp(bestQuality) > 0 {
 							bestQuality = quality
-							bestChiaQualityIndex = i
+							bestChiaQualityIndex = iq
 						}
 					}
 					nextDiff := difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)
 					if bestQuality.Cmp(nextDiff) > 0 {
 						bestChiaQuality := chiaQualities[bestChiaQualityIndex]
-						proof, err := bestChiaQuality.Plot.GetFullProof(challenge,bestChiaQuality.Index)
+						proof, err := poc.GetGNCProof(challenge,bestChiaQuality.Index,bestChiaQuality.Plot)
 						if err != nil {
 							log.Println("get proof err",err.Error())
+							return err
 						}
 						id := bestChiaQuality.Plot.ID()
 						pid := hex.EncodeToString(id[:])
