@@ -21,11 +21,12 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 	var bestQuality = big.NewInt(0)
 	var bestChiaQualityIndex int
 
-	ticker := time.NewTicker(time.Second * poc.PoCSlot / 4)
+	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
 
 	chiaQualities := GetChiaQualities(plots,challenge)
 	if len(chiaQualities) == 0 {
+		log.Println("not found qualities")
 		return nil
 	}
 
