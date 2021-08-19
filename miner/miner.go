@@ -21,7 +21,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 	var bestQuality = big.NewInt(0)
 	var bestChiaQualityIndex int
 
-	ticker := time.NewTicker(time.Second * 3)
+	ticker := time.NewTicker(time.Second * poc.PoCSlot /4)
 	defer ticker.Stop()
 
 	chiaQualities := GetChiaQualities(plots,challenge)
@@ -95,6 +95,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 					atomic.AddUint64(&workSlot, 1)
 					blockTime = blockTime.Add(poc.PoCSlot * time.Second)
 				}
+				continue search
 			}
 		}
 }
