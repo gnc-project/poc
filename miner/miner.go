@@ -42,51 +42,52 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 				default:
 				}
 
-				if time.Now().Unix() > blockTime.Unix() {
-					// Ensure there are valid qualities
-					qualities, err := GetGNCQualities(chiaQualities, workSlot, number)
+				if time.Now().Unix() < blockTime.Unix() {
+					continue search
+				}
+
+				// Ensure there are valid qualities
+				qualities, err := GetGNCQualities(chiaQualities, workSlot, number)
+				if err != nil {
+					return err
+				}
+				if len(qualities) == 0 {
+					continue search
+				}
+
+				// find best quality
+				bestQuality.SetUint64(0)
+				for iq, quality := range qualities {
+					if quality.Cmp(bestQuality) > 0 {
+						bestQuality = quality
+						bestChiaQualityIndex = iq
+					}
+				}
+				nextDiff := difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)
+				if bestQuality.Cmp(nextDiff) > 0 {
+					bestChiaQuality := chiaQualities[bestChiaQualityIndex]
+					proof, err := poc.GetGNCProof(challenge,bestChiaQuality.Index,bestChiaQuality.Plot)
 					if err != nil {
+						log.Println("get proof err",err.Error())
 						return err
 					}
-					if len(qualities) == 0 {
-						continue search
-					}
+					id := bestChiaQuality.Plot.ID()
+					pid := hex.EncodeToString(id[:])
 
-					// find best quality
-					bestQuality.SetUint64(0)
-					for iq, quality := range qualities {
-						if quality.Cmp(bestQuality) > 0 {
-							bestQuality = quality
-							bestChiaQualityIndex = iq
-						}
+					commit <- &poc.Commit{
+						pid,
+						hex.EncodeToString(proof),
+						bestChiaQuality.Plot.Size(),
+						nextDiff,
+						number,
+						blockTime.Unix(),
 					}
-					nextDiff := difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)
-					if bestQuality.Cmp(nextDiff) > 0 {
-						bestChiaQuality := chiaQualities[bestChiaQualityIndex]
-						proof, err := poc.GetGNCProof(challenge,bestChiaQuality.Index,bestChiaQuality.Plot)
-						if err != nil {
-							log.Println("get proof err",err.Error())
-							return err
-						}
-						id := bestChiaQuality.Plot.ID()
-						pid := hex.EncodeToString(id[:])
-
-						commit <- &poc.Commit{
-							pid,
-							hex.EncodeToString(proof),
-							bestChiaQuality.Plot.Size(),
-							nextDiff,
-							number,
-							blockTime.Unix(),
-						}
-						return nil
-					}
-
-					// increase slot and header Timestamp
-					blockTime = blockTime.Add(poc.PoCSlot * time.Second)
-					workSlot = uint64(blockTime.Unix()) / poc.PoCSlot
+					return nil
 				}
-				continue search
+
+				// increase slot and header Timestamp
+				blockTime = blockTime.Add(poc.PoCSlot * time.Second)
+				workSlot = uint64(blockTime.Unix()) / poc.PoCSlot
 			}
 		}
 }
