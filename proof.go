@@ -12,7 +12,7 @@ const (
 
 	AllowAhead = 1
 
-	ToleranceSlot= 4
+	ToleranceSlot = 6
 
 	// KiB represents KiByte
 	KiB = 1024
