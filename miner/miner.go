@@ -86,7 +86,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 				}
 
 				// increase slot and header Timestamp
-				blockTime = blockTime.Add(poc.PoCSlot * time.Second)
+				blockTime = blockTime.Add(poc.AllowAhead * time.Second)
 				workSlot = uint64(blockTime.Unix()) / poc.PoCSlot
 			}
 		}
