@@ -20,7 +20,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 	var bestQuality = big.NewInt(0)
 	var bestChiaQualityIndex int
 
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(poc.PoCSlot * time.Second / 4)
 	defer ticker.Stop()
 
 	chiaQualities := GetChiaQualities(plots,challenge)
@@ -75,19 +75,22 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 					pid := hex.EncodeToString(id[:])
 
 					commit <- &poc.Commit{
-						pid,
-						hex.EncodeToString(proof),
-						bestChiaQuality.Plot.Size(),
-						nextDiff,
-						number,
-						blockTime.Unix(),
+						Pid:        pid,
+						Proof:      hex.EncodeToString(proof),
+						K:          bestChiaQuality.Plot.Size(),
+						Difficulty: nextDiff,
+						Number:     number,
+						Timestamp:  blockTime.Unix(),
 					}
 					return nil
 				}
 
+
 				// increase slot and header Timestamp
 				blockTime = blockTime.Add(poc.AllowAhead * time.Second)
 				workSlot = uint64(blockTime.Unix()) / poc.PoCSlot
+
+				log.Println("increase slot and header Timestamp")
 			}
 		}
 }
