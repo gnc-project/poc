@@ -4,10 +4,11 @@ import (
 	"errors"
 	"github.com/gnc-project/poc/chiapos"
 	"math/big"
+	"sync"
 )
 
-func VerifiedQuality(proof []byte,pid,challenge [32]byte,slot,height,k uint64) (*big.Int,error) {
 
+func VerifiedQuality(proof []byte,pid,challenge [32]byte,slot,height,k uint64) (*big.Int,error) {
 	quality,err := GetVerifiedQuality(pid,int(k),proof,challenge)
 	if err != nil {
 		return nil,err
@@ -19,9 +20,10 @@ func VerifiedQuality(proof []byte,pid,challenge [32]byte,slot,height,k uint64) (
 	return GetQuality(q1, hashVal),nil
 }
 
-
+var lock sync.Mutex
 func GetVerifiedQuality(pid [32]byte,k int,proof []byte,challenge [32]byte) ([]byte, error)  {
-
+	lock.Lock()
+	defer lock.Unlock()
 	if k < chiapos.MinPlotSize || k > chiapos.MaxPlotSize {
 		return nil, errors.New("invalid plot k size")
 	}
