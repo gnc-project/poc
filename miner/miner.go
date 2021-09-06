@@ -2,6 +2,7 @@ package miner
 
 import (
 	"encoding/hex"
+	"fmt"
 	"github.com/gnc-project/poc"
 	"github.com/gnc-project/poc/chiapos"
 	"github.com/gnc-project/poc/difficulty"
@@ -63,6 +64,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 						bestChiaQualityIndex = iq
 					}
 				}
+
 				nextDiff := difficulty.CalcNextRequiredDifficulty(lastBlockTime,diff,blockTime)
 				if bestQuality.Cmp(nextDiff) > 0 {
 					bestChiaQuality := chiaQualities[bestChiaQualityIndex]
@@ -73,6 +75,14 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 					}
 					id := bestChiaQuality.Plot.ID()
 					pid := hex.EncodeToString(id[:])
+
+					dif,err := poc.VerifiedQuality(proof,id,challenge,uint64(blockTime.Unix()/poc.PoCSlot),number,uint64(bestChiaQuality.Plot.Size()))
+					if err != nil {
+						return err
+					}
+					if dif.Cmp(nextDiff) <= 0 {
+						return fmt.Errorf("bestQuality verify is err dif=%v nextDiff=%v",dif,nextDiff)
+					}
 
 					commit <- &poc.Commit{
 						Pid:        pid,
@@ -90,7 +100,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 				blockTime = blockTime.Add(poc.AllowAhead * time.Second)
 				workSlot = uint64(blockTime.Unix()) / poc.PoCSlot
 
-				log.Println("increase slot and header Timestamp")
+				log.Println("increase slot and header Timestamp","bestQuality=",bestQuality,"nextDiff",nextDiff,"blockTime",blockTime)
 			}
 		}
 }
