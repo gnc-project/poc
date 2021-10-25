@@ -39,6 +39,7 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 				default:
 				}
 				if time.Now().Unix() < blockTime.Unix() {
+					time.Sleep(500 * time.Millisecond)
 					continue search
 				}
 
