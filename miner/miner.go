@@ -70,7 +70,6 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 						return err
 					}
 					id := bestChiaQuality.Plot.ID()
-					pid := hex.EncodeToString(id[:])
 
 					dif,err := poc.VerifiedQuality(proof,id,challenge,uint64(blockTime.Unix()/poc.PoCSlot),number,uint64(bestChiaQuality.Plot.Size()))
 					if err != nil {
@@ -81,11 +80,12 @@ func Mine(quit chan struct{},commit chan interface{},plots []*chiapos.DiskProver
 					}
 
 					commit <- &poc.Commit{
-						Pid:        pid,
+						Pid:        hex.EncodeToString(id[:]),
 						Proof:      hex.EncodeToString(proof),
 						K:          bestChiaQuality.Plot.Size(),
 						Difficulty: nextDiff,
 						Number:     number,
+						Challenge:  hex.EncodeToString(challenge[:]),
 						Timestamp:  blockTime.Unix(),
 					}
 					return nil

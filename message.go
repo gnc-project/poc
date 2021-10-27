@@ -8,6 +8,7 @@ type Commit struct {
 	K 		uint8	`json:"k"`
 	Difficulty 	*big.Int	`json:"difficulty"`
 	Number 		uint64		`json:"number"`
+	Challenge	string		`json:"challenge"`
 	Timestamp 	int64		`json:"timestamp"`
 }
 
